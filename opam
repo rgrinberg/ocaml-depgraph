@@ -1,0 +1,17 @@
+opam-version: "1.2"
+name: "cmigraph"
+version: "1.2"
+maintainer: "rgrinberg <rudi.grinberg@gmail.com>"
+authors: "rgrinberg <rudi.grinberg@gmail.com>"
+homepage: "https://github.com/rgrinberg/cmigraph"
+bug-reports: "https://github.com/rgrinberg/cmigraph/issues"
+dev-repo: "git://github.com/rgrinberg/cmigraph"
+license: "MIT"
+build: [ "omake" ]
+depends: [
+  "ocamlfind"  {build}
+  "omake" {build}
+  "cmdliner"
+  "ocamlgraph"
+]
+available: [ ocaml-version >= "4.02.3" ]

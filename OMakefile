@@ -1,0 +1,31 @@
+PROG = cmigraph
+OCAMLFLAGS = -g -bin-annot -thread
+USE_OCAMLFIND = true
+
+OCAMLPACKS = cmdliner ocamlgraph
+
+.SUBDIRS: src
+  FILES = cmigraph
+  .DEFAULT: $(OCamlProgram $(PROG), $(FILES))
+
+.merlin: :value: $(OCAMLPACKS)
+  section
+    chan = $(fopen $@, wb)
+    foreach(s => ..., $(subdirs P,.))
+      fprintln($(chan),B $s)
+      fprintln($(chan),S $s)
+    foreach(p => ..., $(OCAMLPACKS))
+      fprintln($(chan),PKG $p)
+    close($(chan))
+
+.PHONY: clean
+clean:
+  section
+    PRECIOUS = README.md
+    protected.PRJ = $(ls R, .)
+    TARGETS = $(filter-proper-targets $(protected.PRJ))
+    rm -rf $(filter-out $(PRECIOUS),$(TARGETS)) .merlin
+    foreach(p => ..., $(protected.PRJ))
+      rm $(filter-exists $(find $p -name *.cmt -o -name *.cmti))
+
+.DEFAULT: .merlin

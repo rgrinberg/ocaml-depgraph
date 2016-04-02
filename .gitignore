@@ -1,0 +1,14 @@
+*.lock
+*.omc
+*.opt
+*.byte
+*.cmx
+*.cmi
+*.cmo
+*.o
+*.a
+*.cmt
+*.cmti
+.merlin
+.omakedb
+src/cmigraph
