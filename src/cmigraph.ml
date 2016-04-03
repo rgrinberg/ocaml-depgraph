@@ -51,7 +51,10 @@ let find_matching dir ~f =
 let find_cmis = find_matching ~f:(fun f -> Filename.check_suffix f ".cmi")
 
 let find_sources = find_matching ~f:(fun f ->
-  Filename.check_suffix f ".mli" || Filename.check_suffix f ".ml")
+  let base = Filename.basename f in
+  if base = "myocamlbuild.ml" || base = "setup.ml"
+  then false
+  else Filename.check_suffix f ".mli" || Filename.check_suffix f ".ml")
 
 type module_ =
   { name: string
@@ -135,7 +138,7 @@ let read_files_stdin () =
   | [] -> failwith "no input files"
   | ls -> ls
 
-let run_files cmis =
+let run_cmi cmis =
   let g = G.create () in
   let (register, is_available) =
     let h = Hashtbl.create 64 in
@@ -157,12 +160,23 @@ let run_ocamldep sources =
   deps |> List.iter (add_module g is_available);
   G.Dot.output_graph stdout g
 
-let run dir =
+let run dir use_cmi ignores =
+  let ignores = List.map Str.regexp ignores in
   let files =
     match dir with
     | None -> read_files_stdin ()
+    | Some d when use_cmi -> find_cmis d
     | Some d -> find_sources d in
-  run_ocamldep files
+  let files =
+    List.fold_left (fun acc pat ->
+      acc |> List.filter (fun f ->
+        match Str.search_forward pat f 0 with
+        | exception Not_found -> true
+        | _ -> false)
+    ) files ignores in
+  if use_cmi
+  then run_cmi files
+  else run_ocamldep files
 
 open Cmdliner
 
@@ -170,7 +184,15 @@ let dir =
   let doc = "recursively find {cmis,ml + mli}'s in this directory" in
   Arg.(value & pos 0 (some dir) None & info [] ~doc)
 
-let term = Term.(pure run $ dir)
+let use_cmi =
+  let doc = "use cmi's dor dependency analysis (not really useful)" in
+  Arg.(value & flag & info ["cmi"] ~doc)
+
+let ignore_f =
+  let doc = "ignore file paths match this pattern. Str syntax. E.g. 'test_'" in
+  Arg.(value & opt_all string [] & info ["i"; "ignore"] ~doc)
+
+let term = Term.(pure run $ dir $ use_cmi $ ignore_f)
 let info = Term.info "cmigraph"
 
 let () =
