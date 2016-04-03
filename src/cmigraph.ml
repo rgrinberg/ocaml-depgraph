@@ -24,7 +24,6 @@ let fold_process_lines cmd ~f ~init =
   in loop init
 
 let find_cmis dir =
-  printf "Searching for dirs: %s\n" dir;
   let rec loop cmis = function
     | [] -> cmis
     | dir::rest ->
