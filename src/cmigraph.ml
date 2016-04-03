@@ -15,18 +15,13 @@ end
 
 module Dot = Graph.Graphviz.Dot(Display)
 
-let read_process_lines command =
-  let lines = ref [] in
-  let in_channel = Unix.open_process_in command in
-  begin
-    try
-      while true do
-        lines := input_line in_channel :: !lines
-      done;
+let fold_process_lines cmd ~f ~init =
+  let in_channel = Unix.open_process_in cmd in
+  let rec loop acc =
+    try loop (f acc (input_line in_channel))
     with End_of_file ->
-      ignore (Unix.close_process_in in_channel)
-  end;
-  List.rev !lines
+      (ignore (Unix.close_process_in in_channel); acc)
+  in loop init
 
 let find_cmis dir =
   printf "Searching for dirs: %s\n" dir;
@@ -77,19 +72,18 @@ let read_module_line l =
   else None
 
 let read_cmi path =
-  let lines = read_process_lines (sprintf "ocamlobjinfo %s" path) in
-  let modules = ref [] in
-  List.iter (fun line ->
-    match read_module_line line with
-    | Some m -> modules := m :: !modules
-    | None -> ()
-  ) lines;
+  let refs =
+    fold_process_lines (sprintf "ocamlobjinfo %s" path) ~init:[]
+      ~f:(fun acc line ->
+        match read_module_line line with
+        | Some m -> m :: acc
+        | None -> acc) in
   { module_name =
       path
       |> Filename.basename
       |> Filename.chop_extension
       |> String.capitalize
-  ; refs = !modules }
+  ; refs }
 
 let add_cmi graph is_available cmi =
   let v = G.V.create cmi.module_name in
