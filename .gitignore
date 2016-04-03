@@ -13,3 +13,4 @@
 .omakedb
 src/cmigraph
 cmigraph
+*.dot
