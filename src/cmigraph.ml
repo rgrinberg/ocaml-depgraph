@@ -72,18 +72,19 @@ let read_module_line l =
   else None
 
 let read_cmi path =
+  let module_name =
+    path
+    |> Filename.basename
+    |> Filename.chop_extension
+    |> String.capitalize in
   let refs =
     fold_process_lines (sprintf "ocamlobjinfo %s" path) ~init:[]
       ~f:(fun acc line ->
         match read_module_line line with
-        | Some m -> m :: acc
+        | Some m when m.name <> module_name -> m :: acc
+        | Some _
         | None -> acc) in
-  { module_name =
-      path
-      |> Filename.basename
-      |> Filename.chop_extension
-      |> String.capitalize
-  ; refs }
+  { module_name ; refs }
 
 let add_cmi graph is_available cmi =
   let v = G.V.create cmi.module_name in
