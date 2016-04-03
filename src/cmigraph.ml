@@ -46,9 +46,9 @@ let find_cmis dir =
       loop (fs @ cmis) (dirs @ rest) in
   loop [] [dir]
 
-type cmi =
-  { module_name: string
-  ; refs: string list }
+type module_ =
+  { name: string
+  ; deps: string list }
 
 let re =
   let mod_name = {|[A-Z][a-z0-9_]*|} in
@@ -64,24 +64,24 @@ let read_module_line l =
   else None
 
 let read_cmi path =
-  let module_name =
+  let name =
     path
     |> Filename.basename
     |> Filename.chop_extension
     |> String.capitalize in
-  let refs =
+  let deps =
     fold_process_lines (sprintf "ocamlobjinfo %s" path) ~init:[]
       ~f:(fun acc line ->
         match read_module_line line with
-        | Some m when m <> module_name -> m :: acc
+        | Some m when m <> name -> m :: acc
         | Some _
         | None -> acc) in
-  { module_name ; refs }
+  { name ; deps }
 
-let add_cmi graph is_available cmi =
-  let v = G.V.create cmi.module_name in
+let add_cmi graph is_available mod_ =
+  let v = G.V.create mod_.name in
   G.add_vertex graph v;
-  cmi.refs
+  mod_.deps
   |> List.filter is_available
   |> List.iter (fun name ->
     let v' = G.V.create name in
@@ -101,7 +101,7 @@ let run_files cmis =
   let g = G.create () in
   let (register, is_available) =
     let h = Hashtbl.create 64 in
-    (fun { module_name ; _ } -> Hashtbl.replace h module_name ()),
+    (fun { name ; _ } -> Hashtbl.replace h name ()),
     (Hashtbl.mem h) in
   let cmis = List.map read_cmi cmis in
   cmis |> List.iter register;
