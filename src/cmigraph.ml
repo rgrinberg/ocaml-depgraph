@@ -1,19 +1,20 @@
 open Printf
 
-module G = Graph.Imperative.Digraph.Abstract(struct type t = string end)
-
-module Display = struct
+module G = struct
+  module G = Graph.Imperative.Digraph.Abstract(struct type t = string end)
+  module Display = struct
+    include G
+    let vertex_name = V.label
+    let graph_attributes _ = []
+    let default_vertex_attributes _ = []
+    let vertex_attributes _ = []
+    let default_edge_attributes _ = []
+    let edge_attributes _ = []
+    let get_subgraph _ = None
+  end
+  module Dot = Graph.Graphviz.Dot(Display)
   include G
-  let vertex_name = V.label
-  let graph_attributes _ = []
-  let default_vertex_attributes _ = []
-  let vertex_attributes _ = []
-  let default_edge_attributes _ = []
-  let edge_attributes e = [ `Label ("") ]
-  let get_subgraph _ = None
 end
-
-module Dot = Graph.Graphviz.Dot(Display)
 
 let fold_process_lines cmd ~f ~init =
   let in_channel = Unix.open_process_in cmd in
@@ -112,7 +113,7 @@ let run_files cmis =
   let cmis = List.map read_cmi cmis in
   cmis |> List.iter register;
   cmis |> List.iter (add_cmi g is_available);
-  Dot.output_graph stdout g
+  G.Dot.output_graph stdout g
 
 let run dir =
   let files =
