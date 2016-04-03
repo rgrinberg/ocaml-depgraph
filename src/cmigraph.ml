@@ -108,7 +108,7 @@ let run_files cmis =
   let (register, is_available) =
     let h = Hashtbl.create 64 in
     (fun { module_name ; _ } -> Hashtbl.replace h module_name ()),
-    (fun name -> Hashtbl.mem h name) in
+    (Hashtbl.mem h) in
   let cmis = List.map read_cmi cmis in
   cmis |> List.iter register;
   cmis |> List.iter (add_cmi g is_available);
