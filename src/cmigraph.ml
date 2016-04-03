@@ -46,29 +46,21 @@ let find_cmis dir =
       loop (fs @ cmis) (dirs @ rest) in
   loop [] [dir]
 
-type module_ =
-  { name: string
-  ; digest: string }
-
 type cmi =
   { module_name: string
-  ; refs: module_ list }
-
-let of_group s =
-  { digest=Str.matched_group 1 s
-  ; name=Str.matched_group 2 s }
+  ; refs: string list }
 
 let re =
   let mod_name = {|[A-Z][a-z0-9_]*|} in
   let digest = {|[0-9a-f]+|} in
   let space = "\t" in
   let group = sprintf {|\(%s\)|} in
-  sprintf {|%s%s%s%s|} space (group digest) space (group mod_name)
+  sprintf {|%s%s%s%s|} space digest space (group mod_name)
   |> Str.regexp
 
 let read_module_line l =
   if Str.string_match re l 0
-  then Some (of_group l)
+  then Some (Str.matched_group 1 l)
   else None
 
 let read_cmi path =
@@ -81,7 +73,7 @@ let read_cmi path =
     fold_process_lines (sprintf "ocamlobjinfo %s" path) ~init:[]
       ~f:(fun acc line ->
         match read_module_line line with
-        | Some m when m.name <> module_name -> m :: acc
+        | Some m when m <> module_name -> m :: acc
         | Some _
         | None -> acc) in
   { module_name ; refs }
@@ -90,8 +82,8 @@ let add_cmi graph is_available cmi =
   let v = G.V.create cmi.module_name in
   G.add_vertex graph v;
   cmi.refs
-  |> List.filter (fun { name ; _ } -> is_available name)
-  |> List.iter (fun { name ; _ } ->
+  |> List.filter is_available
+  |> List.iter (fun name ->
     let v' = G.V.create name in
     G.add_vertex graph v';
     G.add_edge graph v v'
