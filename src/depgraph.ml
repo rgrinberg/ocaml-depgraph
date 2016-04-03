@@ -193,7 +193,7 @@ let ignore_f =
   Arg.(value & opt_all string [] & info ["i"; "ignore"] ~doc)
 
 let term = Term.(pure run $ dir $ use_cmi $ ignore_f)
-let info = Term.info "cmigraph"
+let info = Term.info "depgraph"
 
 let () =
   match Term.eval (term, info) with

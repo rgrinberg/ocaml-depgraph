@@ -1,11 +1,11 @@
 opam-version: "1.2"
-name: "cmigraph"
+name: "depgraph"
 version: "1.2"
 maintainer: "rgrinberg <rudi.grinberg@gmail.com>"
 authors: "rgrinberg <rudi.grinberg@gmail.com>"
-homepage: "https://github.com/rgrinberg/cmigraph"
-bug-reports: "https://github.com/rgrinberg/cmigraph/issues"
-dev-repo: "git://github.com/rgrinberg/cmigraph"
+homepage: "https://github.com/rgrinberg/ocaml-depgraph"
+bug-reports: "https://github.com/rgrinberg/ocaml-depgraph/issues"
+dev-repo: "git://github.com/rgrinberg/ocaml-depgraph"
 license: "MIT"
 build: [ "omake" ]
 depends: [

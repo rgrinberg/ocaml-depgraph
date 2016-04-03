@@ -1,11 +1,11 @@
-PROG = cmigraph
+PROG = depgraph
 OCAMLFLAGS = -g -bin-annot -thread
 USE_OCAMLFIND = true
 
 OCAMLPACKS = cmdliner ocamlgraph str
 
 .SUBDIRS: src
-  FILES = cmigraph
+  FILES = depgraph
   .DEFAULT: $(OCamlProgram $(PROG), $(FILES))
 
 .merlin: :value: $(OCAMLPACKS)
@@ -18,7 +18,7 @@ OCAMLPACKS = cmdliner ocamlgraph str
       fprintln($(chan),PKG $p)
     close($(chan))
 
-cmigraph: src/cmigraph
+depgraph: src/depgraph
     ln-or-cp $< $@
 
 .PHONY: clean
@@ -31,4 +31,4 @@ clean:
     foreach(p => ..., $(protected.PRJ))
       rm $(filter-exists $(find $p -name *.cmt -o -name *.cmti))
 
-.DEFAULT: .merlin cmigraph
+.DEFAULT: .merlin depgraph

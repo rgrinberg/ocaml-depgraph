@@ -1,4 +1,4 @@
-# cmigraph
+# ocaml-depgraph
 
 Generate a dot graph from your cmi files.
 
@@ -6,10 +6,11 @@ Generate a dot graph from your cmi files.
 
 2 ways to provide cmi's to this utility.
 
-Easiest one is to provide a directory that will be recursively walked for cmi's
+Easiest one is to provide a directory that will be recursively walked for ml
+and mli sources
 
 ```
-$ cmigraph _build > depend.dot
+$ depgraph src > depend.dot
 ```
 
 Second one is to provide a newline separated list of files through STDIN.
@@ -17,7 +18,7 @@ Second one is to provide a newline separated list of files through STDIN.
 For example:
 
 ```
-$ find my_dir -iname "*.cmi" | cmigraph > depend.dot
+$ find src -iname "*.ml" -or -iname "*.mli" | depgraph > depend.dot
 ```
 
 At the end you may view your graph with something like:
