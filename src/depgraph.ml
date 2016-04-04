@@ -193,7 +193,18 @@ let ignore_f =
   Arg.(value & opt_all string [] & info ["i"; "ignore"] ~doc)
 
 let term = Term.(pure run $ dir $ use_cmi $ ignore_f)
-let info = Term.info "depgraph"
+let info =
+  let man =
+    [ `S "DESCRIPTION"
+    ; `P "Create dot graphs from OCaml sources or cmi's. $(b,depgraph) Either \
+          reads the source files a directory specified as an argument or as a \
+          newline separated list of files. One that can easily be generated \
+          with find or git ls-files"
+    ; `S "EXAMPLES"
+    ; `P {|git ls-files | depgraph -i "test_" > g.dot|}
+    ; `P {|depgraph . -i "build_"|}
+    ] in
+  Term.info ~man "depgraph"
 
 let () =
   match Term.eval (term, info) with
