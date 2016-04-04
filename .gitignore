@@ -11,6 +11,6 @@
 *.cmti
 .merlin
 .omakedb
-src/cmigraph
-cmigraph
+src/depgraph
+depgraph
 *.dot
